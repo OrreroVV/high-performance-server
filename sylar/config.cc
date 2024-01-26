@@ -2,11 +2,9 @@
 
 namespace sylar{
 
-Config::ConfigVarMap Config::s_datas;
-
 ConfigVarBase::ptr Config::LookupBase(const std::string& name){
-    auto it = s_datas.find(name);
-    if(it!= s_datas.end()){
+    auto it = GetDatas().find(name);
+    if(it!= GetDatas().end()){
         return it->second;
     }
     return nullptr;

@@ -75,6 +75,7 @@
         "valarray": "cpp",
         "variant": "cpp",
         "strstream": "cpp",
-        "source_location": "cpp"
+        "source_location": "cpp",
+        "slist": "cpp"
     }
 }

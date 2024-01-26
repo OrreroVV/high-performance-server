@@ -281,6 +281,8 @@ class ConfigVar: public ConfigVarBase{
 
 public:
     typedef std::shared_ptr<ConfigVar> ptr;
+    typedef std::function<void (const T& old_value, const T& new_value)> on_change_cb;
+
     ConfigVar(const std::string& name, const T& default_value, const std::string& description = "")
          :ConfigVarBase(name, description)
          ,m_val(default_value){
@@ -312,11 +314,61 @@ public:
     }
 
     const T getValue() const { return m_val; }
-    void setValue(const T& val) { m_val = val; }
+    void setValue(const T& v) { 
+        if(v == m_val) {
+            return;
+        }
+        for(auto& i : m_cbs) {
+            i.second(m_val, v);
+        }
+        m_val = v;
+     }
+    /**
+     * @brief 返回参数值的类型名称(typeinfo)
+     */
     std::string getTypeName() const override { return typeid(T).name();}
+
+        /**
+     * @brief 添加变化回调函数
+     * @return 返回该回调函数对应的唯一id,用于删除回调
+     */
+    uint64_t addListener(on_change_cb cb) {
+        static uint64_t s_fun_id = 0;
+        ++s_fun_id;
+        m_cbs[s_fun_id] = cb;
+        return s_fun_id;
+    }
+
+    /**
+     * @brief 删除回调函数
+     * @param[in] key 回调函数的唯一id
+     */
+    void delListener(uint64_t key) {
+        m_cbs.erase(key);
+    }
+
+    /**
+     * @brief 获取回调函数
+     * @param[in] key 回调函数的唯一id
+     * @return 如果存在返回对应的回调函数,否则返回nullptr
+     */
+    on_change_cb getListener(uint64_t key) {
+        auto it = m_cbs.find(key);
+        return it == m_cbs.end() ? nullptr : it->second;
+    }
+
+    /**
+     * @brief 清理所有的回调函数
+     */
+    void clearListener() {
+        m_cbs.clear();
+    }
 
 private:
     T m_val;
+    
+    //变更回调函数组，通过map判断函数是否相等，要求唯一
+    std::map<uint64_t, on_change_cb> m_cbs;
 };
 
 class Config {
@@ -326,8 +378,8 @@ public:
     template<class T> 
     static typename ConfigVar<T>::ptr Lookup(const std::string& name,
         const T& default_value, const std::string& description = ""){
-            auto it = s_datas.find(name);
-            if (it != s_datas.end()){
+            auto it = GetDatas().find(name);
+            if (it != GetDatas().end()){
                 auto tmp = std::dynamic_pointer_cast<ConfigVar<T>>(it->second);
                 if(tmp) {
                     SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << "Lookup name=" << name << " exists";
@@ -346,7 +398,7 @@ public:
                 }
 
             typename ConfigVar<T>::ptr v(new ConfigVar<T>(name, default_value, description));
-            s_datas[name] = v;
+            GetDatas()[name] = v;
             return v;
         }
     
@@ -358,8 +410,8 @@ public:
     
     template<class T>
     static typename ConfigVar<T>::ptr Lookup(const std::string& name){
-            auto it = s_datas.find(name);
-            if (it == s_datas.end()){
+            auto it = GetDatas().find(name);
+            if (it == GetDatas().end()){
                 return nullptr;
             }
             return std::dynamic_pointer_cast<ConfigVar<T>>(it->second);
@@ -369,8 +421,13 @@ public:
     static void LoadFromYaml(const YAML::Node& root);
 
 private:
-    static ConfigVarMap s_datas;
-
+    /**
+     * @brief 返回所有的配置项
+     */
+    static ConfigVarMap& GetDatas() {
+        static ConfigVarMap s_datas;
+        return s_datas;
+    }
 };
 
 }

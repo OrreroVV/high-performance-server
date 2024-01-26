@@ -172,8 +172,6 @@ public:
 };
 
 }
-
-
 sylar::ConfigVar<Person>::ptr g_person =
     sylar::Config::Lookup("class.person", Person(), "class person");
 
@@ -197,34 +195,48 @@ void test_class() {
 
     XX_PM(g_person_map, "class.map before");
     SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << "before: " << g_person_vec_map->toString();
+
+    g_person->addListener([](const Person& old_value, const Person& new_value){
+        SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << "old_value=" << old_value.toString()
+                << " new_value=" << new_value.toString();
+    });
+
     YAML::Node root = YAML::LoadFile("/home/hzh/workspace/high-performance-server/bin/conf/log.yml");
     sylar::Config::LoadFromYaml(root);
+
+
 
     SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << "after: " << g_person->getValue().toString() << " - " << g_person->toString();
     XX_PM(g_person_map, "class.map after");
     SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << "after: " << g_person_vec_map->toString();
-    // g_person->addListener([](const Person& old_value, const Person& new_value){
-    //     SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << "old_value=" << old_value.toString()
-    //             << " new_value=" << new_value.toString();
-    // });
-
-    //XX_PM(g_person_map, "class.map before");
-
-    // YAML::Node root = YAML::LoadFile("/home/hzh/workspace/high-performance-server/bin/conf/log.yml");
-    // sylar::Config::LoadFromYaml(root);
-
-    // SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << "after: " << g_person->getValue().toString() << " - " << g_person->toString();
-    //XX_PM(g_person_map, "class.map after");
-    // SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << "after: " << g_person_vec_map->toString();
 }
 
+void test_log() {
+    static sylar::Logger::ptr system_log = SYLAR_LOG_NAME("system");
+    static sylar::Logger::ptr root_log = SYLAR_LOG_NAME("root");
+    std::cout << sylar::LoggerMgr::GetInstance()->toYamlString() << std::endl;
+    SYLAR_LOG_INFO(system_log) << "hello system system_log old" << std::endl;
+    YAML::Node root = YAML::LoadFile("/home/hzh/workspace/high-performance-server/bin/conf/log.yml");
+    sylar::Config::LoadFromYaml(root);
+
+    std::cout << "=============" << std::endl;
+    std::cout << sylar::LoggerMgr::GetInstance()->toYamlString() << std::endl;
+    std::cout << "=============" << std::endl;
+    std::cout << "root: " << root << std::endl;
+
+    SYLAR_LOG_INFO(system_log);
+    SYLAR_LOG_INFO(root_log);
+    system_log->setFormatter("%d ---------------- %d%n");
+    //SYLAR_LOG_INFO(root_log) << "hello root root_log new" << std::endl;
+    SYLAR_LOG_INFO(system_log);
+}
+
+
 int main(int argc, char** argv){
-    // SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << g_int_value_config->getValue();
-    // SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << g_float_value_config->getValue();
 
     //test_config();
     //test_yaml();
-    test_class();
-
+    //test_class();
+    test_log();
     return 0;
 }
