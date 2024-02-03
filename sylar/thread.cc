@@ -5,8 +5,32 @@ namespace sylar{
 
 static sylar::Logger::ptr g_logger = SYLAR_LOG_NAME("system");
 
-//静态变量&函数
-static thread_local Thread* t_thread = nullptr;
+Semaphore::Semaphore(uint32_t count){
+    if (sem_init(&m_semaphore, 0, count)){
+        throw std::logic_error("sem_init error");
+    }
+}
+
+Semaphore::~Semaphore(){
+    sem_destroy(&m_semaphore);
+}
+
+void Semaphore::wait(){
+    if (sem_post(&m_semaphore)){
+        throw std::logic_error("sem_post error");
+    }
+}
+
+void Semaphore::notify(){
+    if (sem_post(&m_semaphore)){
+        throw std::logic_error("sem_post error");
+    }
+}
+
+//thread
+
+// 静态变量&函数
+static thread_local Thread *t_thread = nullptr;
 static thread_local std::string t_thread_name = "UNKNOW";
 Thread* Thread::GetThis(){
     return t_thread;
@@ -24,17 +48,17 @@ void Thread::SetName(const std::string &name){
 
 Thread::Thread(std::function<void()> cb, const std::string &name)
     : m_cb(cb), m_name(name){
-    if (name.empty())
-    {
+    if (name.empty()){
         m_name = "UNKNOW";
     }
     int rt = pthread_create(&m_thread, nullptr, &Thread::run, this);
-    if (rt)
-    {
+    if (rt){
         SYLAR_LOG_ERROR(g_logger) << "pthread_create thread fail, rt=" << rt
                                   << " name=" << name;
         throw std::logic_error("pthread_create error");
     }
+
+    m_semaphore.wait();
 }
 
 Thread::~Thread(){
@@ -65,7 +89,7 @@ void *Thread::run(void *arg){
     std::function<void()> cb;
     cb.swap(thread->m_cb);
 
-
+    thread->m_semaphore.notify();
     cb();
     return 0;
 }

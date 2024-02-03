@@ -5,6 +5,7 @@ namespace sylar{
 ConfigVarBase::ptr Config::LookupBase(const std::string& name){
     auto it = GetDatas().find(name);
     if(it!= GetDatas().end()){
+        //std::cout << "Lookup: " << ((*it).second)->getName() << std::endl;
         return it->second;
     }
     return nullptr;
@@ -33,11 +34,10 @@ void Config::LoadFromYaml(const YAML::Node& root){
     ListAllMember("", root, all_nodes);
     for(auto& i : all_nodes) {
         std::string key = i.first;
-        //std::cout << "xxxxxxxxxxxxxx: " << i.first << " yyyyyy: " << i.second << std::endl;
         if(key.empty()) {
             continue;
         }
-
+        
         std::transform(key.begin(), key.end(), key.begin(), ::tolower);
         ConfigVarBase::ptr var = LookupBase(key);
         
@@ -47,6 +47,7 @@ void Config::LoadFromYaml(const YAML::Node& root){
             } else {
                 std::stringstream ss;
                 ss << i.second;
+
                 var->fromString(ss.str());
             }
         }

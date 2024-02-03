@@ -302,6 +302,7 @@ public:
 
     bool fromString(const std::string& val) override {
         try{
+            //std::cout << "set string value: " << val << std::endl;
             //m_val = boost::lexical_cast<T>(val);
             setValue(FromStr()(val));
             
