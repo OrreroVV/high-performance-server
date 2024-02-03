@@ -26,7 +26,7 @@ CmakeLists.txt	 --cmake
 lib	--库的输出路径
 # Makefile	--
 sylar	--源代码路径
-test	--测试路径
+tests	--测试路径
 logs 	--日志存放路径
 ```
 
