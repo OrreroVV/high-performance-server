@@ -19,14 +19,14 @@ void fun1(){
     }
 }
 void fun2() {
-    int cnt = 1000;
-    while(cnt--) {
+    while(true) {
         SYLAR_LOG_INFO(g_logger) << "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
     }
 }
+
+
 void fun3() {
-    int cnt = 1000;
-    while(cnt--) {
+    while(true) {
         SYLAR_LOG_INFO(g_logger) << "========================================";
     }
 }
@@ -50,11 +50,12 @@ int main(int argc, char** argv){
     //     sylar::Thread::ptr thr(new sylar::Thread(&fun1, "name_ " + std::to_string(i)));
     //     thrs.push_back(thr);
     // }
-    for (int i = 0; i < 4; i++){
+    for (size_t i = 0; i < thrs.size(); i++){
         thrs[i]->join();
     }
 
     SYLAR_LOG_INFO(g_logger) << "thread test end";
     //SYLAR_LOG_INFO(g_logger) << "count= " << count;
+
     return 0;
 }

@@ -205,7 +205,7 @@ private:
 class LogAppender{
 friend class Logger;
 public:
-    typedef Mutex MutexType;
+    typedef Spinlock MutexType;
     typedef std::shared_ptr<LogAppender> ptr;
     virtual ~LogAppender(){}
     virtual void log(std::shared_ptr<Logger> logger, LogLevel::Level, LogEvent:: ptr event) = 0;
@@ -237,7 +237,7 @@ private:
 class Logger: public std::enable_shared_from_this<Logger>{
 friend class LoggerManager;
 public:
-    typedef Mutex MutexType;
+    typedef Spinlock MutexType;
     typedef std::shared_ptr<Logger> ptr;
     Logger(const std::string& name = "root");
 
@@ -275,7 +275,7 @@ private:
 
 class LoggerManager{
 public:
-    typedef Mutex MutexType;
+    typedef Spinlock MutexType;
     LoggerManager();
     Logger::ptr getLogger(const std::string& name);
     void init();
@@ -301,8 +301,15 @@ public:
     //重新打开文件
     bool reopen();
 private:
+    /*
+    @brief 文件路径
+    */
     std::string m_filename;
+
+    /// 文件流
     std::ofstream m_filestream;
+    /// 上次重新打开时间
+    uint64_t m_lastTime = 0;
 };
 
 };

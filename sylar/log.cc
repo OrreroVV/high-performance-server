@@ -377,7 +377,7 @@ bool FileLogAppender::reopen(){
     if (m_filestream){
         m_filestream.close();
     }
-    m_filestream.open(m_filename);
+    m_filestream.open(m_filename, std::ios::app);
     return !!m_filestream;
 }
 
@@ -388,14 +388,16 @@ FileLogAppender::FileLogAppender(const std::string& filename): m_filename(filena
 
 void FileLogAppender::log(std::shared_ptr<Logger> logger, LogLevel::Level level, LogEvent::ptr event){
     if (level >= m_level){
-        m_filestream << m_formatter->format(logger, level, event);
+        uint64_t now = event->getTime();
+        if(now >= (m_lastTime + 3)) {
+            reopen();
+            m_lastTime = now;
+        }
+        MutexType::Lock lock(m_mutex);
+        if(!(m_filestream << m_formatter->format(logger, level, event))) {
+            std::cout << "error" << std::endl;
+        }
     }
-
-    //MutexType::Lock lock(m_mutex);
-    // //if(!(m_filestream << m_formatter->format(logger, level, event))) {
-    // if(!m_formatter->format(m_filestream, logger, level, event)) {
-    //     std::cout << "error" << std::endl;
-    // }
 }
 
 //构造函数

@@ -238,5 +238,13 @@ int main(int argc, char** argv){
     //test_yaml();
     //test_class();
     test_log();
+
+    
+    sylar::Config::Visit([](sylar::ConfigVarBase::ptr var){
+        SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << "name= " << var->getName()
+                                << "description= " << var->getDescription()
+                                << "typename= " << var->getTypeName() 
+                                << "value= " << var->toString();
+    });
     return 0;
 }
