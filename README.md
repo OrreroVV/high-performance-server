@@ -151,6 +151,27 @@ typedef ScopedLockImpl<CASLock> Lock;
 
 # 协程库封装
 
+
+## 定义协程接口
+```
+ucontext_t
+macro
+```
+
+```shell
+Fiber::GetThis() # 得到当前协程
+
+Thread -> main_fiber <--> sub_fiber
+```
+
+##协程调度模块
+
+```
+scheduler ->  thread -> fiber
+1. 线程池  分配一组线程
+2. 协程调度器 将协程制定到相应的线程上去执行
+```
+
 # socker函数库
 
 # http协议开发

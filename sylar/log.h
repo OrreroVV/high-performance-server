@@ -23,7 +23,7 @@
     if(logger->getLevel() <= level) \
         sylar::LogEventWrap(sylar::LogEvent::ptr(new sylar::LogEvent(logger, level, \
                         __FILE__, __LINE__, 0, sylar::GetThreadId(),\
-                sylar::GetFiberId(), time(0)))).getSS()
+                sylar::GetFiberId(), time(0), sylar::Thread::GetName()))).getSS()
 
 /**
  * @brief 使用流式方式将日志级别debug的日志写入到logger
@@ -60,7 +60,7 @@
     if(logger->getLevel() <= level) \
         sylar::LogEventWrap(sylar::LogEvent::ptr(new sylar::LogEvent(logger, level, \
                         __FILE__, __LINE__, 0, sylar::GetThreadId(),\
-                sylar::GetFiberId(), time(0)))).getEvent()->format(fmt, __VA_ARGS__)
+                sylar::GetFiberId(), time(0), sylar::Thread::GetName()))).getEvent()->format(fmt, __VA_ARGS__)
 
 /**
  * @brief 使用格式化方式将日志级别debug的日志写入到logger
@@ -127,8 +127,20 @@ class LogEvent{
 public:
     typedef std::shared_ptr<LogEvent> ptr;
 
+    /**
+     * @brief 构造函数
+     * @param[in] logger 日志器
+     * @param[in] level 日志级别
+     * @param[in] file 文件名
+     * @param[in] line 文件行号
+     * @param[in] elapse 程序启动依赖的耗时(毫秒)
+     * @param[in] thread_id 线程id
+     * @param[in] fiber_id 协程id
+     * @param[in] time 日志事件(秒)
+     * @param[in] thread_name 线程名称
+     */
     LogEvent(std::shared_ptr<Logger> logger, LogLevel::Level level, const char* file, int32_t m_line, 
-        uint32_t elapse, uint32_t thread_id, uint32_t fiber_id, uint64_t time);
+        uint32_t elapse, uint32_t thread_id, uint32_t fiber_id, uint64_t time, const std::string& thread_name);
 
     const char* getFile()const { return m_file;}
     int32_t getLine()const { return m_line;};
@@ -140,6 +152,11 @@ public:
     std::stringstream& getSS()  { return m_ss; }
     std::shared_ptr<Logger> getLogger() const { return m_logger;}
     LogLevel::Level getLevel() const { return m_level; }
+
+    /**
+     * @brief 返回线程名称
+     */
+    const std::string& getThreadName() const { return m_threadName;}
 
     void format(const char* fmt, ...);
 
@@ -158,6 +175,7 @@ private:
     std::stringstream m_ss;
     std::shared_ptr<Logger> m_logger;    //日志器
     LogLevel::Level m_level;
+    std::string m_threadName;
 } ;
 
 
