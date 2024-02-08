@@ -167,9 +167,43 @@ Thread -> main_fiber <--> sub_fiber
 ##协程调度模块
 
 ```
+        1  -   N   1 -  M
 scheduler ->  thread -> fiber
+        N       -       M
 1. 线程池  分配一组线程
 2. 协程调度器 将协程制定到相应的线程上去执行
+```
+作用：开辟一组线程池，对想要执行的协程找到一个对应的线程，放到该线程队列中去执行
+
+
+协程调度器
+```
+m_fibers  --> (function<void()> || fiber) 需要thread_id
+```
+
+start()
+
+stop()
+
+//调度核心，协程调度器如何去协助工作
+
+run()
+1. 设置当前线程的协程调度(scheduler)
+2. 设置当前的线程的run， fiber
+3. 协程调度
+    1. 协程消息队列里面是否有任务
+    2. 无任务时执行idle
+
+
+
+```
+IOManager(epoll) --> Scheduler
+        |
+        |
+        |
+        |
+        v
+        idle(epoll_wait)
 ```
 
 # socker函数库

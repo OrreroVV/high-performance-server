@@ -2,7 +2,7 @@
 #include "config.h"
 #include "macro.h"
 #include "log.h"
-//#include "scheduler.h"
+#include "scheduler.h"
 #include <atomic>
 
 namespace sylar {
@@ -17,7 +17,7 @@ static std::atomic<uint64_t> s_fiber_count {0};
 
 //当前协程指针
 static thread_local Fiber* t_fiber = nullptr;
-//主进程指针，管理其他协程调度
+//主线程指针，管理其他协程调度
 static thread_local Fiber::ptr t_threadFiber = nullptr;
 
 static ConfigVar<uint32_t>::ptr g_fiber_stack_size =
@@ -43,7 +43,7 @@ uint64_t Fiber::GetFiberId() {
     return 0;
 }
 
-//创建主进程
+//创建主线程，管理调度其他协程
 Fiber::Fiber() {
     m_state = EXEC;
     SetThis(this);
@@ -141,15 +141,15 @@ void Fiber::swapIn() {
     SetThis(this);
     SYLAR_ASSERT(m_state != EXEC);
     m_state = EXEC;
-    if(swapcontext(&(t_threadFiber)->m_ctx, &m_ctx)) {
+    if(swapcontext(&Scheduler::GetMainFiber()->m_ctx, &m_ctx)) {
         SYLAR_ASSERT2(false, "swapcontext");
     }
 }
 
 //阻塞当前协程
 void Fiber::swapOut() {
-    SetThis((t_threadFiber).get());
-    if(swapcontext(&m_ctx, &(t_threadFiber)->m_ctx)) {
+    SetThis(Scheduler::GetMainFiber());
+    if(swapcontext(&m_ctx, &(Scheduler::GetMainFiber())->m_ctx)) {
         SYLAR_ASSERT2(false, "swapcontext");
     }
 }
@@ -159,7 +159,7 @@ void Fiber::SetThis(Fiber* f) {
     t_fiber = f;
 }
 
-//返回当前协程，如果当前并没有协程，创建主进程并返回
+//返回当前协程，如果当前并没有协程，创建主线程并返回
 Fiber::ptr Fiber::GetThis() {
     if(t_fiber) {
         //SYLAR_LOG_DEBUG(g_logger) << "Get This fiber: " << t_fiber->getId() << " " << t_threadFiber->getId();

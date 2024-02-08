@@ -15,9 +15,9 @@ Semaphore::~Semaphore(){
     sem_destroy(&m_semaphore);
 }
 
-void Semaphore::wait(){
-    if (sem_post(&m_semaphore)){
-        throw std::logic_error("sem_post error");
+void Semaphore::wait() {
+    if(sem_wait(&m_semaphore)) {
+        throw std::logic_error("sem_wait error");
     }
 }
 
@@ -31,6 +31,7 @@ void Semaphore::notify(){
 
 // 静态变量&函数
 static thread_local Thread *t_thread = nullptr;
+
 static thread_local std::string t_thread_name = "UNKNOW";
 Thread* Thread::GetThis(){
     return t_thread;
@@ -51,7 +52,10 @@ Thread::Thread(std::function<void()> cb, const std::string &name)
     if (name.empty()){
         m_name = "UNKNOW";
     }
+
+    //线程创建，并且绑定run方法，并且执行run方法，其中run的参数是this，并且以默认的创建线程方式创建，把返回的线程id赋值给m_thread上
     int rt = pthread_create(&m_thread, nullptr, &Thread::run, this);
+    //SYLAR_LOG_DEBUG(g_logger) << "thread created name: " << m_name << "threadId: " << m_thread;
     if (rt){
         SYLAR_LOG_ERROR(g_logger) << "pthread_create thread fail, rt=" << rt
                                   << " name=" << name;
@@ -80,7 +84,12 @@ void Thread::join(){
 }
 
 void *Thread::run(void *arg){
+
     Thread *thread = (Thread *)arg;
+
+    //SYLAR_LOG_DEBUG(g_logger) << "threadId: " << thread->m_thread;
+
+    //函数指针赋值
     t_thread = thread;
     t_thread_name = thread->m_name;
     thread->m_id = sylar::GetThreadId();
@@ -91,6 +100,7 @@ void *Thread::run(void *arg){
 
     thread->m_semaphore.notify();
     cb();
+    
     return 0;
 }
 

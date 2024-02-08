@@ -23,6 +23,7 @@ set(LIB_SRC
     sylar/config.cc
     sylar/thread.cc
     sylar/fiber.cc
+    sylar/scheduler.cc
     )
 
 #把LIB_SRC添加到名为sylar的库中
@@ -85,6 +86,16 @@ add_dependencies(test_fiber sylar)
 force_redefine_file_macro_for_sources(test_fiber) 
 #test 链接库LIB_LIB
 target_link_libraries(test_fiber sylar ${LIB_LIB})
+
+
+# 生成可执行文件test_scheduler，将sylar作为依赖项
+add_executable(test_scheduler "tests/test_scheduler.cc" sylar "${LIBS}")
+#test_scheduler 依赖于sylar
+add_dependencies(test_scheduler sylar)
+#把test_scheduler加入到__FILE__宏定义中,显示相对位置
+force_redefine_file_macro_for_sources(test_scheduler) 
+#test_scheduler 链接库LIB_LIB
+target_link_libraries(test_scheduler sylar ${LIB_LIB})
 
 
 # 设置可执行文件和库文件的输出路径
