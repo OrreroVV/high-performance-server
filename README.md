@@ -204,6 +204,15 @@ IOManager(epoll) --> Scheduler
         |
         v
         idle(epoll_wait)
+
+PutMessage(msg.) 信号量+1
+message_queue
+        |
+        |---Thread
+        |---Thread
+                wait()信号量-1， RecvMessage
+异步IO，等待数据返回 -->epoll_wait
+
 ```
 
 # socker函数库
