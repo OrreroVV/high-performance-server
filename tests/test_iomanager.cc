@@ -10,11 +10,10 @@
 
 sylar::Logger::ptr g_logger = SYLAR_LOG_ROOT();
 
-int sock = 0;
+int sock;
 
 void test_fiber() {
     SYLAR_LOG_INFO(g_logger) << "test_fiber sock=" << sock;
-
     //sleep(3);
 
     //close(sock);
@@ -27,7 +26,8 @@ void test_fiber() {
     memset(&addr, 0, sizeof(addr));
     addr.sin_family = AF_INET;
     addr.sin_port = htons(80);
-    inet_pton(AF_INET, "115.239.210.27", &addr.sin_addr.s_addr);
+    inet_pton(AF_INET, "110.242.68.66", &addr.sin_addr.s_addr);
+
 
     if(!connect(sock, (const sockaddr*)&addr, sizeof(addr))) {
     } else if(errno == EINPROGRESS) {
@@ -35,6 +35,7 @@ void test_fiber() {
         sylar::IOManager::GetThis()->addEvent(sock, sylar::IOManager::READ, [](){
             SYLAR_LOG_INFO(g_logger) << "read callback";
         });
+
         sylar::IOManager::GetThis()->addEvent(sock, sylar::IOManager::WRITE, [](){
             SYLAR_LOG_INFO(g_logger) << "write callback";
             //close(sock);
@@ -48,27 +49,33 @@ void test_fiber() {
 }
 
 void test1() {
-    std::cout << "EPOLLIN=" << EPOLLIN
-              << " EPOLLOUT=" << EPOLLOUT << std::endl;
-    sylar::IOManager iom(3, false, "test");
+    // std::cout << "EPOLLIN=" << EPOLLIN
+    //           << " EPOLLOUT=" << EPOLLOUT << std::endl;
+    sylar::IOManager iom(3, false, "IOtest");
     iom.schedule(&test_fiber);
+    // sylar::Scheduler sc(3, false, "test");
+    // sc.start();
+    
+    // sc.stop();
 }
 
 sylar::Timer::ptr s_timer;
 void test_timer() {
-    sylar::IOManager iom(2);
+    sylar::IOManager iom(2, false, "timer");
     s_timer = iom.addTimer(1000, [](){
         static int i = 0;
         SYLAR_LOG_INFO(g_logger) << "hello timer i=" << i;
         if(++i == 3) {
-            s_timer->reset(2000, true);
-            //s_timer->cancel();
+            //s_timer->reset(2000, true);
+            s_timer->cancel();
         }
     }, true);
 }
 
 int main(int argc, char** argv) {
-    test1();
-    //test_timer();
+    YAML::Node root = YAML::LoadFile("/home/hzh/workspace/high-performance-server/bin/conf/log_iomanager.yml");
+    sylar::Config::LoadFromYaml(root);
+    //test1();
+    test_timer();
     return 0;
 }

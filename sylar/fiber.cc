@@ -17,7 +17,7 @@ static std::atomic<uint64_t> s_fiber_count {0};
 
 //当前协程指针
 static thread_local Fiber* t_fiber = nullptr;
-//主线程指针，管理其他协程调度
+//当前线程指针
 static thread_local Fiber::ptr t_threadFiber = nullptr;
 
 static ConfigVar<uint32_t>::ptr g_fiber_stack_size =
@@ -54,7 +54,7 @@ Fiber::Fiber() {
 
     ++s_fiber_count;
 
-    SYLAR_LOG_DEBUG(g_logger) << "Fiber::Fiber main";
+    SYLAR_LOG_DEBUG(g_logger) << "Fiber::Fiber: create main fiber numbers: " << s_fiber_count;
 }
 
 Fiber::Fiber(std::function<void()> cb, size_t stacksize, bool use_caller)
@@ -77,7 +77,7 @@ Fiber::Fiber(std::function<void()> cb, size_t stacksize, bool use_caller)
         makecontext(&m_ctx, &Fiber::CallerMainFunc, 0);
     }
 
-    SYLAR_LOG_DEBUG(g_logger) << "Fiber::Fiber id=" << m_id;
+    SYLAR_LOG_DEBUG(g_logger) << "Fiber::Fiber create fiber: id=" << m_id;
 }
 
 Fiber::~Fiber() {
@@ -162,12 +162,12 @@ void Fiber::SetThis(Fiber* f) {
 //返回当前协程，如果当前并没有协程，创建主线程并返回
 Fiber::ptr Fiber::GetThis() {
     if(t_fiber) {
-        //SYLAR_LOG_DEBUG(g_logger) << "Get This fiber: " << t_fiber->getId() << " " << t_threadFiber->getId();
         return t_fiber->shared_from_this();
     }
     Fiber::ptr main_fiber(new Fiber);
     SYLAR_ASSERT(t_fiber == main_fiber.get());
     t_threadFiber = main_fiber;
+    
     return t_fiber->shared_from_this();
 }
 

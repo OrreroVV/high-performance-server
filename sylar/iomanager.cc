@@ -104,6 +104,7 @@ IOManager::IOManager(size_t threads, bool use_caller, const std::string& name)
     m_epfd = epoll_create(5000);
     SYLAR_ASSERT(m_epfd > 0);
 
+    //建立管道连接
     int rt = pipe(m_tickleFds);
     SYLAR_ASSERT(!rt);
 
@@ -121,7 +122,7 @@ IOManager::IOManager(size_t threads, bool use_caller, const std::string& name)
     rt = fcntl(m_tickleFds[0], F_SETFL, O_NONBLOCK);
     SYLAR_ASSERT(!rt);
 
-
+    //epoll添加监听事件,监听m_tickleFds[0]
     rt = epoll_ctl(m_epfd, EPOLL_CTL_ADD, m_tickleFds[0], &event);
     SYLAR_ASSERT(!rt);
 
