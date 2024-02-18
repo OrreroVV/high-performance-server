@@ -66,6 +66,7 @@ void test_timer() {
         static int i = 0;
         SYLAR_LOG_INFO(g_logger) << "hello timer i=" << i;
         if(++i == 3) {
+            
             //s_timer->reset(2000, true);
             s_timer->cancel();
         }

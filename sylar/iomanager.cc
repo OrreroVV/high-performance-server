@@ -300,6 +300,8 @@ bool IOManager::cancelAll(int fd) {
     if((int)m_fdContexts.size() <= fd) {
         return false;
     }
+
+    //找到句柄对应的fd_ctx
     FdContext* fd_ctx = m_fdContexts[fd];
     lock.unlock();
 
@@ -313,6 +315,7 @@ bool IOManager::cancelAll(int fd) {
     epevent.events = 0;
     epevent.data.ptr = fd_ctx;
 
+    //epoll删除该句柄
     int rt = epoll_ctl(m_epfd, op, fd, &epevent);
     if(rt) {
         SYLAR_LOG_ERROR(g_logger) << "epoll_ctl(" << m_epfd << ", "
@@ -321,6 +324,7 @@ bool IOManager::cancelAll(int fd) {
         return false;
     }
 
+    //如果还存在读或者写事件，执行掉
     if(fd_ctx->events & READ) {
         fd_ctx->triggerEvent(READ);
         --m_pendingEventCount;

@@ -212,7 +212,36 @@ message_queue
         |---Thread
                 wait()信号量-1， RecvMessage
 异步IO，等待数据返回 -->epoll_wait
+```
 
+定时器
+```
+针对IOmanager创建定时器
+Timer -> addTimer() --> cancel()
+获取当前定时器触发离现在的时间差
+返回当前要触发的定时器，执行回调函数
+```
+
+
+```
+[Fiber] --> [Thread] --> [Scheduler]
+                             |
+                             |
+                      [IOmanager(epoll)]
+                             |
+                             |
+                         [timeManager]
+                             |
+                             |
+                          [Timer]
+
+```
+
+## HOOK
+```
+sleep
+
+usleep
 ```
 
 # socker函数库

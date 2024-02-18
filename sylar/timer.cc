@@ -105,7 +105,6 @@ Timer::ptr TimerManager::addTimer(uint64_t ms, std::function<void()> cb
     return timer;
 }
 
-
 static void OnTimer(std::weak_ptr<void> weak_cond, std::function<void()> cb) {
     // 使用弱指针检查所指向的对象是否存在
     std::shared_ptr<void> tmp = weak_cond.lock();
@@ -114,10 +113,16 @@ static void OnTimer(std::weak_ptr<void> weak_cond, std::function<void()> cb) {
     }
 }
 
+/*
+添加条件计时器
+cb为回调函数
+bind绑定静态函数OnTimer，无需this指向
+weak_cond为条件弱指针
+*/
 Timer::ptr TimerManager::addConditionTimer(uint64_t ms, std::function<void()> cb
                                     ,std::weak_ptr<void> weak_cond
                                     ,bool recurring) {
-   
+                                        
     return addTimer(ms, std::bind(&OnTimer, weak_cond, cb), recurring);
 }
 

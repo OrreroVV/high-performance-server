@@ -9,19 +9,17 @@
 #include <semaphore.h>
 #include <atomic>
 
+#include "noncopyable.h"
+
 namespace sylar{
 
-class Semaphore{
+class Semaphore : Noncopyable{
 public:
     Semaphore(uint32_t count = 0);
     ~Semaphore();
 
     void wait();
     void notify();
-private:
-    Semaphore(const Semaphore&) = delete;
-    Semaphore(const Semaphore&&) = delete;
-    Semaphore& operator = (const Semaphore &) = delete;
 private:
     sem_t m_semaphore;
 };
@@ -176,7 +174,7 @@ private:
 /**
  * @brief 互斥量
  */
-class Mutex{
+class Mutex : Noncopyable{
 public: 
     /// 局部锁
     typedef ScopedLockImpl<Mutex> Lock;
@@ -217,7 +215,7 @@ private:
 /**
  * @brief 空锁(用于调试)
  */
-class NullMutex{
+class NullMutex : Noncopyable{
 public:
     /// 局部锁
     typedef ScopedLockImpl<NullMutex> Lock;
@@ -246,7 +244,7 @@ public:
 /**
  * @brief 读写互斥量
  */
-class RWMutex{
+class RWMutex : Noncopyable{
 public:
 
     /// 局部读锁
@@ -297,7 +295,7 @@ private:
 /**
  * @brief 空读写锁(用于调试)
  */
-class NullRWMutex{
+class NullRWMutex : Noncopyable{
 public:
     /// 局部读锁
     typedef ReadScopedLockImpl<NullMutex> ReadLock;
@@ -331,7 +329,7 @@ public:
 /**
  * @brief 自旋锁
  */
-class Spinlock{
+class Spinlock : Noncopyable{
 public:
     /// 局部锁
     typedef ScopedLockImpl<Spinlock> Lock;
@@ -371,7 +369,7 @@ private:
 /**
  * @brief 原子锁
  */
-class CASLock{
+class CASLock : Noncopyable{
 public:
     /// 局部锁
     typedef ScopedLockImpl<CASLock> Lock;
@@ -410,7 +408,7 @@ private:
 
 
 
-class Thread{
+class Thread : Noncopyable{
 public:
     typedef std::shared_ptr<Thread> ptr;
     Thread(std::function<void()> cb, const std::string& name);
@@ -424,10 +422,6 @@ public:
     static const std::string& GetName();
     static void SetName(const std::string& name);
 private:
-    Thread(const Thread&) = delete;
-    Thread(const Thread&&) = delete;
-    Thread& operator=(const Thread&) = delete;
-
     static void* run(void* arg);
 private:
     /// 主线程id

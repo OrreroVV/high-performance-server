@@ -1,7 +1,7 @@
 #include "scheduler.h"
 #include "log.h"
 #include "macro.h"
-//#include "hook.h"
+#include "hook.h"
 
 namespace sylar {
 
@@ -152,7 +152,7 @@ void Scheduler::setThis() {
 
 //新创建的线程在run里面启动
 void Scheduler::run() {
-    //set_hook_enable(true);
+    set_hook_enable(true);
     setThis();
 
     //SYLAR_LOG_DEBUG(g_logger) << "t_scheduler value: " << t_scheduler;
