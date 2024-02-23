@@ -20,6 +20,7 @@ find_library(PTHREAD pthread)
 
 #添加LIB_SRC 为下列文件
 set(LIB_SRC
+    sylar/address.cc
     sylar/config.cc
     sylar/fd_manager.cc
     sylar/fiber.cc
@@ -122,6 +123,15 @@ add_dependencies(test_hook sylar)
 force_redefine_file_macro_for_sources(test_hook) 
 #test_hook 链接库LIB_LIB
 target_link_libraries(test_hook sylar ${LIB_LIB})
+
+# 生成可执行文件test_address，将sylar作为依赖项
+add_executable(test_address "tests/test_address.cc" sylar "${LIBS}")
+#test_address 依赖于sylar
+add_dependencies(test_address sylar)
+#test_address 加入到__FILE__宏定义中,显示相对位置
+force_redefine_file_macro_for_sources(test_address) 
+#test_address 链接库LIB_LIB
+target_link_libraries(test_address sylar ${LIB_LIB})
 
 
 # 设置可执行文件和库文件的输出路径
