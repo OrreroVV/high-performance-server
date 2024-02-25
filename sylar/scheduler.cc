@@ -7,6 +7,10 @@ namespace sylar {
 
 static sylar::Logger::ptr g_logger = SYLAR_LOG_NAME("system");
 
+/*
+ 每个线程都会拥有自己独立的变量副本
+ 保证每个线程的静态指针指向不同
+*/
 //调度器
 static thread_local Scheduler* t_scheduler = nullptr;
 
@@ -59,6 +63,7 @@ Fiber* Scheduler::GetMainFiber() {
 }
 
 void Scheduler::start() {
+
     MutexType::Lock lock(m_mutex);
     if(!m_stopping) {
         return;
@@ -152,6 +157,9 @@ void Scheduler::setThis() {
 
 //新创建的线程在run里面启动
 void Scheduler::run() {
+    /*
+    使用hook的函数
+    */
     set_hook_enable(true);
     setThis();
 

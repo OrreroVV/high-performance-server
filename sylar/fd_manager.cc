@@ -33,7 +33,8 @@ bool FdCtx::init() {
     if(-1 == fstat(m_fd, &fd_stat)) {
         m_isInit = false;
         m_isSocket = false;
-    } else {
+    } 
+    else {
         m_isInit = true;
         //判断当前创建的FdCtx是否是socket
         m_isSocket = S_ISSOCK(fd_stat.st_mode);
@@ -51,7 +52,8 @@ bool FdCtx::init() {
             fcntl_f(m_fd, F_SETFL, flags | O_NONBLOCK);
         }
         m_sysNonblock = true;
-    } else {
+    } 
+    else {
         m_sysNonblock = false;
     }
 
@@ -96,6 +98,10 @@ FdCtx::ptr FdManager::get(int fd, bool auto_create) {
         }
     }
     lock.unlock();
+
+    /*
+    到这里的都是违背初始化，并且auto_create = true的
+    */
 
     //越界了，重置一下长度，并创建
     RWMutexType::WriteLock lock2(m_mutex);

@@ -172,7 +172,8 @@ private:
 };
 
 /**
- * @brief 互斥量
+ * @brief 互斥量 
+ * 创建默认开启锁
  */
 class Mutex : Noncopyable{
 public: 

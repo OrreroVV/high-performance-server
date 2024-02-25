@@ -28,6 +28,7 @@ set(LIB_SRC
     sylar/iomanager.cc
     sylar/log.cc
     sylar/scheduler.cc
+    sylar/socket.cc
     sylar/thread.cc
     sylar/timer.cc
     sylar/util.cc

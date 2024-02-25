@@ -23,6 +23,7 @@ const char* LogLevel::ToString(LogLevel::Level level)
 }
 
 
+
 LogLevel::Level LogLevel::FromString(const std::string& str) {
 #define XX(level, v) \
     if(str == #v) { \

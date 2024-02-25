@@ -29,10 +29,14 @@ void Semaphore::notify(){
 
 //thread
 
-// 静态变量&函数
+/*
+ 静态变量&函数
+ 每个线程都会拥有自己独立的变量副本
+ 保证每个线程的静态指针指向不同
+*/
 static thread_local Thread *t_thread = nullptr;
-
 static thread_local std::string t_thread_name = "UNKNOW";
+
 Thread* Thread::GetThis(){
     return t_thread;
 }
@@ -93,6 +97,10 @@ void *Thread::run(void *arg){
     t_thread = thread;
     t_thread_name = thread->m_name;
     thread->m_id = sylar::GetThreadId();
+
+    /*
+    设置可读的名字
+    */
     pthread_setname_np(pthread_self(), thread->m_name.substr(0, 15).c_str());
 
     std::function<void()> cb;

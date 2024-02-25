@@ -44,7 +44,7 @@ public:
 private:
     /**
      * @brief 无参构造函数
-     * @attention 每个线程第一个协程的构造
+     * @attention 每个线程第一个协程的构造，充当主协程
      */
     Fiber();
 
