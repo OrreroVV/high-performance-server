@@ -80,7 +80,6 @@ int pthread_setname_np(pthread_t thread, const char *name);
 /*
 thread: 要设置名称的线程的标识符。
 name: 要为线程设置的名称，以字符串形式表示。
-
 如果成功，返回值为 0；如果出现错误，则返回相应的错误码。
 pthread_setname_np 允许为指定线程设置一个人类可读的名称，以方便调试和诊断。
 设置线程名称可以有助于在调试器中更轻松地区分和识别不同的线程。
@@ -137,6 +136,13 @@ TCP协议
 IPPROTO_UDP
 UDP协议
 
+SOCK_STREAM: TCP
+SOCK_DGRAM:  UDP
+
+SOL_SOCKET: 它指定了要设置的选项位于 socket 层级。
+SO_REUSEADDR: 是一个常量，表示套接字选项，用于指示套接字地址是否可以重用。通过设置该选项，可以允许多个套接字绑定到相同的地址和端口上。
+
+
 */
 
 /*
@@ -163,8 +169,75 @@ struct sockaddr_in {
 struct in_addr {
     unsigned long s_addr;       // IPv4 地址
 };
+
+
+
+#define UNIX_PATH_MAX 108
+struct sockaddr_un {
+    sa_family_t sun_family;          // AF_UNIX
+    char        sun_path[UNIX_PATH_MAX];  // 路径名
+};
+
+
 /*
 sizeof(sockaddr) == sizeof(sockaddr_in)
 可以互相指针转换
 */
 ```
+
+
+setsockopt 是一个系统调用，通常用于设置与套接字相关的选项。在网络编程中，程序员可以使用 setsockopt 函数来配置已打开套接字的行为。以下是关于 setsockopt 函数的一些重要信息：
+
+```c++
+/*
+返回值：
+如果成功，返回值为 0；如果出现错误，则返回 -1，并设置相应的错误码。
+功能：
+setsockopt 函数用于设置指定套接字的选项，这些选项可以控制套接字的行为，例如超时、缓冲区大小、复用地址等。可以通过设置不同的选项来调整套接字在网络通信过程中的行为和性能。
+常见用途：
+设置套接字的超时选项。
+设置套接字的缓冲区大小。
+开启或关闭套接字的 keep-alive 功能。
+设置套接字的广播权限。
+设置套接字的复用地址等。
+
+*/
+
+int setsockopt(int sockfd, int level, int optname, const void *optval, socklen_t optlen);
+```
+- sockfd: 套接字描述符，指定要设置选项的套接字。
+- level: 选项所在的协议级别，比如 SOL_SOCKET 表示基础套接字选项。
+- optname: 要设置的选项名称，具体取决于所设置的选项。
+- optval: 指向包含新选项值的缓冲区的指针。
+- optlen: 选项值的大小。
+
+
+
+```c++
+struct addrinfo {
+    int              ai_flags;
+    int              ai_family;
+    int              ai_socktype;
+    int              ai_protocol;
+    socklen_t        ai_addrlen;
+    struct sockaddr *ai_addr;
+    char            *ai_canonname;
+    struct addrinfo *ai_next;
+};
+```
+- ai_flags：标志，用于指定查找地址信息时的选项。
+- ai_family：协议簇（如 AF_INET 表示 IPv4，AF_INET6 表示 IPv6）。
+- ai_socktype：套接字类型（如 SOCK_STREAM 表示流式套接字，SOCK_DGRAM 表示数据报套接字）。
+- ai_protocol：协议类型（如 IPPROTO_TCP 表示 TCP 协议，IPPROTO_UDP 表示 UDP 协议）。
+- ai_addrlen：地址长度。
+- ai_addr：指向 sockaddr 结构体的指针，包含主机地址和端口信息。
+- ai_canonname：规范名称。
+- ai_next：下一个 addrinfo 结构体的指针，用于形成链表。
+
+```c++
+int getaddrinfo(const char *node, const char *service, const struct addrinfo *hints, struct addrinfo **res);
+```
+- node：要连接的主机名或 IP 地址。可以是主机名、IPv4 地址或 IPv6 地址。
+- service：提供的服务名称或端口号。可以是端口号的数字形式或标准服务名称，例如 "http"。
+- hints：一个 addrinfo 结构体，提供了关于我们希望返回的地址类型和其他选项的提示。
+- res：用于存储返回的地址信息的首个 addrinfo 结构体的指针。

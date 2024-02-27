@@ -8,9 +8,9 @@
 #include "util.h"
 
 #if defined __GNUC__ || defined __llvm__
-/// LIKCLY 宏的封装, 告诉编译器优化,条件大概率成立
+/// LIKCLY 宏的封装, 告诉编译器优化,条件大概率成立，条件成功几率大
 #   define SYLAR_LIKELY(x)       __builtin_expect(!!(x), 1)
-/// LIKCLY 宏的封装, 告诉编译器优化,条件大概率不成立
+/// LIKCLY 宏的封装, 告诉编译器优化,条件大概率不成立，条件成功几率小
 #   define SYLAR_UNLIKELY(x)     __builtin_expect(!!(x), 0)
 #else
 #   define SYLAR_LIKELY(x)      (x)

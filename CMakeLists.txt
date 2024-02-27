@@ -7,7 +7,7 @@ include (cmake/utils.cmake)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)  #
 # 设置编译选项
-set(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -rdynamic -O3 -fPIC -ggdb -std=c++11 -Wall -Wno-deprecated -Werror -Wno-unused-function -Wno-builtin-macro-redefined -Wno-deprecated-declarations  -Werror=unused-variable")
+set(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS}  -lssl -lcrypto   -rdynamic -O3 -fPIC -ggdb -std=c++11 -Wall -Wno-deprecated -Werror -Wno-unused-function -Wno-builtin-macro-redefined -Wno-deprecated-declarations  -Werror=unused-variable")
 
 # 导入当前文件夹下所有
 include_directories(.)
@@ -16,6 +16,13 @@ link_directories(/apps/sylar/lib)
 
 find_library(YAMLCPP yaml-cpp)
 find_library(PTHREAD pthread)
+
+
+# 导入openssl依赖
+find_package(OpenSSL REQUIRED)
+if(OPENSSL_FOUND)
+    include_directories(${OPENSSL_INCLUDE_DIR})
+endif()
 
 
 #添加LIB_SRC 为下列文件
@@ -42,6 +49,7 @@ set(LIB_LIB
     sylar 
     pthread
     dl
+    ${OPENSSL_LIBRARIES}
     ${YAMLCPP}
 )
 
@@ -133,6 +141,15 @@ add_dependencies(test_address sylar)
 force_redefine_file_macro_for_sources(test_address) 
 #test_address 链接库LIB_LIB
 target_link_libraries(test_address sylar ${LIB_LIB})
+
+# 生成可执行文件test_address，将sylar作为依赖项
+add_executable(test_socket "tests/test_socket.cc" sylar "${LIBS}")
+#test_address 依赖于sylar
+add_dependencies(test_socket sylar)
+#test_address 加入到__FILE__宏定义中,显示相对位置
+force_redefine_file_macro_for_sources(test_socket) 
+#test_address 链接库LIB_LIB
+target_link_libraries(test_socket sylar ${LIB_LIB})
 
 
 # 设置可执行文件和库文件的输出路径

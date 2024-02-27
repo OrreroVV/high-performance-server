@@ -10,8 +10,6 @@
 #include <google/protobuf/unknown_field_set.h>
 
 #include "fiber.h"
-#include "config.h"
-#include "util.h"
 #include "log.h"
 
 namespace sylar{

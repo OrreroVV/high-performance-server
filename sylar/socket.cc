@@ -102,7 +102,11 @@ void Socket::setRecvTimeout(int64_t v) {
     setOption(SOL_SOCKET, SO_RCVTIMEO, tv);
 }
 
+
 bool Socket::getOption(int level, int option, void* result, socklen_t* len) {
+    /*
+    得到socket option
+    */
     int rt = getsockopt(m_sock, level, option, result, (socklen_t*)len);
     if(rt) {
         SYLAR_LOG_DEBUG(g_logger) << "getOption sock=" << m_sock
@@ -114,6 +118,7 @@ bool Socket::getOption(int level, int option, void* result, socklen_t* len) {
 }
 
 bool Socket::setOption(int level, int option, const void* result, socklen_t len) {
+
     if(setsockopt(m_sock, level, option, result, (socklen_t)len)) {
         SYLAR_LOG_DEBUG(g_logger) << "setOption sock=" << m_sock
             << " level=" << level << " option=" << option
@@ -141,10 +146,14 @@ bool Socket::init(int sock) {
     //获取句柄管理器
     FdCtx::ptr ctx = FdMgr::GetInstance()->get(sock);
 
+    /*
+    如果该sock是socket并且没有被关闭
+    */
     if(ctx && ctx->isSocket() && !ctx->isClose()) {
         
         m_sock = sock;
         m_isConnected = true;
+
         initSock();
         getLocalAddress();
         getRemoteAddress();
@@ -155,6 +164,7 @@ bool Socket::init(int sock) {
 
 bool Socket::bind(const Address::ptr addr) {
     //m_localAddress = addr;
+    //如果socket无效的话
     if(!isValid()) {
         newSock();
         if(SYLAR_UNLIKELY(!isValid())) {
@@ -162,6 +172,9 @@ bool Socket::bind(const Address::ptr addr) {
         }
     }
 
+    /*
+    判断family是否相同，相同的协议族才能进行绑定
+    */
     if(SYLAR_UNLIKELY(addr->getFamily() != m_family)) {
         SYLAR_LOG_ERROR(g_logger) << "bind sock.family("
             << m_family << ") addr.family(" << addr->getFamily()
@@ -412,6 +425,7 @@ bool Socket::isValid() const {
 int Socket::getError() {
     int error = 0;
     socklen_t len = sizeof(error);
+    //如果当前socket的属性取不到的话，则返回-1，否则返回0
     if(!getOption(SOL_SOCKET, SO_ERROR, &error, &len)) {
         error = errno;
     }
@@ -458,17 +472,26 @@ bool Socket::cancelAll() {
 
 void Socket::initSock() {
     int val = 1;
+    /*
+    SOL_SOCKET: 它指定了要设置的选项位于 socket 层级。
+    SO_REUSEADDR: 是一个常量，表示套接字选项，用于指示套接字地址是否可以重用。
+通过设置该选项，可以允许多个套接字绑定到相同的地址和端口上。
+    */
     setOption(SOL_SOCKET, SO_REUSEADDR, val);
+
+    //针对tcp
     if(m_type == SOCK_STREAM) {
         setOption(IPPROTO_TCP, TCP_NODELAY, val);
     }
 }
 
 void Socket::newSock() {
+    //把socket创建出来
     m_sock = socket(m_family, m_type, m_protocol);
     if(SYLAR_LIKELY(m_sock != -1)) {
         initSock();
-    } else {
+    } 
+    else {
         SYLAR_LOG_ERROR(g_logger) << "socket(" << m_family
             << ", " << m_type << ", " << m_protocol << ") errno="
             << errno << " errstr=" << strerror(errno);
@@ -488,6 +511,7 @@ struct _SSLInit {
 static _SSLInit s_init;
 
 }
+
 
 SSLSocket::SSLSocket(int family, int type, int protocol)
     :Socket(family, type, protocol) {

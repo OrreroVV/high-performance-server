@@ -2,6 +2,7 @@
 #define __SYLAR_UTIL_H__
 
 #include <pthread.h>
+#include <cxxabi.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/syscall.h>
@@ -9,7 +10,11 @@
 #include <stdint.h>
 #include <vector>
 #include <string>
-
+//#include <json/json.h>
+#include <yaml-cpp/yaml.h>
+#include <iostream>
+#include <boost/lexical_cast.hpp>
+#include <google/protobuf/message.h>
 namespace sylar
 {
     pid_t GetThreadId();

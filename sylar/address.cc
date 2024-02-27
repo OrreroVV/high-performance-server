@@ -81,7 +81,10 @@ bool Address::Lookup(std::vector<Address::ptr>& result, const std::string& host,
     */
 
 
-    //检查 ipv6address serivce   [2001:db8::1]:8080
+    /*
+    检查 ipv6address serivce   [2001:db8::1]:8080
+    如果是类似ipv6格式的地址的话
+    */
     if(!host.empty() && host[0] == '[') {
         const char* endipv6 = (const char*)memchr(host.c_str() + 1, ']', host.size() - 1);
         if(endipv6) {
@@ -96,18 +99,26 @@ bool Address::Lookup(std::vector<Address::ptr>& result, const std::string& host,
     //检查 node serivce
     if(node.empty()) {
         service = (const char*)memchr(host.c_str(), ':', host.size());
+        /*
+        如果有：，说明可能是ipv4地址
+        */
         if(service) {
+            /*
+            如果没有找到第二个：，说明是一个ipv4的地址，node存储ip，service存储端口号
+            */
             if(!memchr(service + 1, ':', host.c_str() + host.size() - service - 1)) {
                 node = host.substr(0, service - host.c_str());
                 ++service;
+                SYLAR_LOG_DEBUG(g_logger) << "node: " << node << "  service: " << service;
             }
         }
     }
 
+
+    //如果node是空的话，说明host就是域名，比如baidu.com
     if(node.empty()) {
         node = host;
     }
-    SYLAR_LOG_DEBUG(g_logger) << "look up: " << node.c_str() << " service:  " << service;
     int error = getaddrinfo(node.c_str(), service, &hints, &results);
     if(error) {
         SYLAR_LOG_DEBUG(g_logger) << "Address::Lookup getaddress(" << host << ", "

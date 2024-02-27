@@ -160,7 +160,7 @@ public:
     virtual Socket::ptr accept();
 
     /**
-     * @brief 绑定地址
+     * @brief m_sock绑定地址addr
      * @param[in] addr 地址
      * @return 是否绑定成功
      */

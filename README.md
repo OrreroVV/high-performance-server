@@ -256,6 +256,10 @@ fd相关(fcntl, ioctl...)
 ```
 
 # socker函数库
+
+[unixAddress]
+    |
+
                                | -|IPv4Address|
 |Address| --- |IPAddress|   ---|
                                | -|IPv6Address|
@@ -275,6 +279,11 @@ accept
 
 read/write/close
 
+# 序列化bytearray
+
+
+write(int, float, int64, ...)
+reead(int, float, int64, ...)
 
 
 # http协议开发
