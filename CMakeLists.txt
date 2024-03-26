@@ -17,6 +17,7 @@ link_directories(/apps/sylar/lib)
 find_library(YAMLCPP yaml-cpp)
 find_library(PTHREAD pthread)
 
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/hzh)
 
 # 导入openssl依赖
 find_package(OpenSSL REQUIRED)
@@ -28,6 +29,7 @@ endif()
 #添加LIB_SRC 为下列文件
 set(LIB_SRC
     sylar/address.cc
+    sylar/bytearray.cc
     sylar/config.cc
     sylar/fd_manager.cc
     sylar/fiber.cc
@@ -54,6 +56,19 @@ set(LIB_LIB
 )
 
 message("***", ${LIB_LIB})
+
+
+
+# 生成可执行文件test_socket，将sylar作为依赖项
+add_executable(test_test "tests/test_test.cc" sylar "${LIBS}")
+#test_socket 依赖于sylar
+add_dependencies(test_test sylar)
+#test_socket 加入到__FILE__宏定义中,显示相对位置
+force_redefine_file_macro_for_sources(test_test) 
+#test_socket 链接库LIB_LIB
+target_link_libraries(test_test sylar ${LIB_LIB})
+
+
 
 
 # 生成可执行文件test，将sylar作为依赖项
@@ -142,14 +157,23 @@ force_redefine_file_macro_for_sources(test_address)
 #test_address 链接库LIB_LIB
 target_link_libraries(test_address sylar ${LIB_LIB})
 
-# 生成可执行文件test_address，将sylar作为依赖项
+# 生成可执行文件test_socket，将sylar作为依赖项
 add_executable(test_socket "tests/test_socket.cc" sylar "${LIBS}")
-#test_address 依赖于sylar
+#test_socket 依赖于sylar
 add_dependencies(test_socket sylar)
-#test_address 加入到__FILE__宏定义中,显示相对位置
+#test_socket 加入到__FILE__宏定义中,显示相对位置
 force_redefine_file_macro_for_sources(test_socket) 
-#test_address 链接库LIB_LIB
+#test_socket 链接库LIB_LIB
 target_link_libraries(test_socket sylar ${LIB_LIB})
+
+# 生成可执行文件test_bytearray，将sylar作为依赖项
+add_executable(test_bytearray "tests/test_bytearray.cc" sylar "${LIBS}")
+#test_bytearray 依赖于sylar
+add_dependencies(test_bytearray sylar)
+#test_bytearray 加入到__FILE__宏定义中,显示相对位置
+force_redefine_file_macro_for_sources(test_bytearray) 
+#test_bytearray 链接库LIB_LIB
+target_link_libraries(test_bytearray sylar ${LIB_LIB})
 
 
 # 设置可执行文件和库文件的输出路径
