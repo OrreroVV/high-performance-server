@@ -19,7 +19,6 @@ FdCtx::FdCtx(int fd)
 }
 
 FdCtx::~FdCtx() {
-    
 }
 
 bool FdCtx::init() {
@@ -33,27 +32,18 @@ bool FdCtx::init() {
     if(-1 == fstat(m_fd, &fd_stat)) {
         m_isInit = false;
         m_isSocket = false;
-    } 
-    else {
+    } else {
         m_isInit = true;
-        //判断当前创建的FdCtx是否是socket
         m_isSocket = S_ISSOCK(fd_stat.st_mode);
     }
 
-    //如果是socket
     if(m_isSocket) {
-        /*
-        F_GETFL得到当前m_fd的属性
-        如果m_fd不是非阻塞的话，及&O_NONBLOCK不存在
-        则置为非阻塞状态
-        */
         int flags = fcntl_f(m_fd, F_GETFL, 0);
         if(!(flags & O_NONBLOCK)) {
             fcntl_f(m_fd, F_SETFL, flags | O_NONBLOCK);
         }
         m_sysNonblock = true;
-    } 
-    else {
+    } else {
         m_sysNonblock = false;
     }
 
@@ -83,32 +73,20 @@ FdManager::FdManager() {
 }
 
 FdCtx::ptr FdManager::get(int fd, bool auto_create) {
-    if(fd == -1) {
-        return nullptr;
-    }
     RWMutexType::ReadLock lock(m_mutex);
     if((int)m_datas.size() <= fd) {
         if(auto_create == false) {
             return nullptr;
         }
-    } 
-    else {
+    } else {
         if(m_datas[fd] || !auto_create) {
             return m_datas[fd];
         }
     }
     lock.unlock();
 
-    /*
-    到这里的都是违背初始化，并且auto_create = true的
-    */
-
-    //越界了，重置一下长度，并创建
     RWMutexType::WriteLock lock2(m_mutex);
     FdCtx::ptr ctx(new FdCtx(fd));
-    if(fd >= (int)m_datas.size()) {
-        m_datas.resize(fd * 1.5);
-    }
     m_datas[fd] = ctx;
     return ctx;
 }

@@ -1,6 +1,5 @@
 #include "sylar/address.h"
 #include "sylar/log.h"
-#include "sylar/config.h"
 
 sylar::Logger::ptr g_logger = SYLAR_LOG_ROOT();
 
@@ -8,9 +7,7 @@ void test() {
     std::vector<sylar::Address::ptr> addrs;
 
     SYLAR_LOG_INFO(g_logger) << "begin";
-
-    //bool v = sylar::Address::Lookup(addrs, "localhost:3080");
-    bool v = sylar::Address::Lookup(addrs, "www.baidu.com:http");
+    bool v = sylar::Address::Lookup(addrs, "www.baidu.com", AF_INET);
     //bool v = sylar::Address::Lookup(addrs, "www.sylar.top", AF_INET);
     SYLAR_LOG_INFO(g_logger) << "end";
     if(!v) {
@@ -20,13 +17,6 @@ void test() {
 
     for(size_t i = 0; i < addrs.size(); ++i) {
         SYLAR_LOG_INFO(g_logger) << i << " - " << addrs[i]->toString();
-    }
-
-    auto addr = sylar::Address::LookupAny("localhost:4080");
-    if(addr) {
-        SYLAR_LOG_INFO(g_logger) << *addr;
-    } else {
-        SYLAR_LOG_ERROR(g_logger) << "error";
     }
 }
 
@@ -47,17 +37,15 @@ void test_iface() {
 
 void test_ipv4() {
     //auto addr = sylar::IPAddress::Create("www.sylar.top");
-    auto addr = sylar::IPAddress::Create("127.0.0.8", 3306);
+    auto addr = sylar::IPAddress::Create("127.0.0.8");
     if(addr) {
         SYLAR_LOG_INFO(g_logger) << addr->toString();
     }
 }
 
 int main(int argc, char** argv) {
-    YAML::Node root = YAML::LoadFile("/home/hzh/workspace/high-performance-server/bin/conf/log_address.yml");
-    sylar::Config::LoadFromYaml(root);
-    test_ipv4();
-    // test_iface();
-    // test();
+    //test_ipv4();
+    //test_iface();
+    test();
     return 0;
 }

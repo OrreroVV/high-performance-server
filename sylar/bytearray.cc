@@ -55,8 +55,7 @@ bool ByteArray::isLittleEndian() const {
 void ByteArray::setIsLittleEndian(bool val) {
     if(val) {
         m_endian = SYLAR_LITTLE_ENDIAN;
-    } 
-    else {
+    } else {
         m_endian = SYLAR_BIG_ENDIAN;
     }
 }
@@ -68,13 +67,13 @@ void ByteArray::writeFint8  (int8_t value) {
 void ByteArray::writeFuint8 (uint8_t value) {
     write(&value, sizeof(value));
 }
-
 void ByteArray::writeFint16 (int16_t value) {
     if(m_endian != SYLAR_BYTE_ORDER) {
         value = byteswap(value);
     }
     write(&value, sizeof(value));
 }
+
 void ByteArray::writeFuint16(uint16_t value) {
     if(m_endian != SYLAR_BYTE_ORDER) {
         value = byteswap(value);
@@ -110,25 +109,10 @@ void ByteArray::writeFuint64(uint64_t value) {
     write(&value, sizeof(value));
 }
 
-
-/*
-写/读不定长
-
-
-如果是负数的话，最高位为1
-为了压缩，可以把负数转成正数
-如果是负数，则转成正数，并且乘以2 - 1，这样一定是奇数
-
-如果是正数的话，乘2，一定是偶数
-
-这样解码的时候判断是否是奇数,即可得到是否是负数
-*/
-
 static uint32_t EncodeZigzag32(const int32_t& v) {
     if(v < 0) {
         return ((uint32_t)(-v)) * 2 - 1;
-    } 
-    else {
+    } else {
         return v * 2;
     }
 }
@@ -136,8 +120,7 @@ static uint32_t EncodeZigzag32(const int32_t& v) {
 static uint64_t EncodeZigzag64(const int64_t& v) {
     if(v < 0) {
         return ((uint64_t)(-v)) * 2 - 1;
-    } 
-    else {
+    } else {
         return v * 2;
     }
 }
@@ -173,12 +156,6 @@ void ByteArray::writeInt64  (int64_t value) {
 void ByteArray::writeUint64 (uint64_t value) {
     uint8_t tmp[10];
     uint8_t i = 0;
-    /*
-    0x80: 10000000
-    0x7f: 01111111
-
-    每7位进行读取，一位标记该字节后七位是否有值
-    */
     while(value >= 0x80) {
         tmp[i++] = (value & 0x7F) | 0x80;
         value >>= 7;
@@ -186,12 +163,6 @@ void ByteArray::writeUint64 (uint64_t value) {
     tmp[i++] = value;
     write(tmp, i);
 }
-
-
-/*
-float double
-*/
-
 
 void ByteArray::writeFloat  (float value) {
     uint32_t v;
@@ -228,13 +199,6 @@ void ByteArray::writeStringVint(const std::string& value) {
 void ByteArray::writeStringWithoutLength(const std::string& value) {
     write(value.c_str(), value.size());
 }
-
-
-
-
-/*
-read
-*/
 
 int8_t   ByteArray::readFint8() {
     int8_t v;
@@ -381,24 +345,14 @@ void ByteArray::write(const void* buf, size_t size) {
     if(size == 0) {
         return;
     }
-
-    //至少需要剩余容量为size
     addCapacity(size);
 
-    //当前内存块上操作的位置
     size_t npos = m_position % m_baseSize;
-
-    //为当前内存块剩余的大小
     size_t ncap = m_cur->size - npos;
-
-    //当前累计写入的大小
     size_t bpos = 0;
 
     while(size > 0) {
         if(ncap >= size) {
-            /*
-            写入[bpos, bpos + size]长度
-            */
             memcpy(m_cur->ptr + npos, (const char*)buf + bpos, size);
             if(m_cur->size == (npos + size)) {
                 m_cur = m_cur->next;
@@ -406,9 +360,7 @@ void ByteArray::write(const void* buf, size_t size) {
             m_position += size;
             bpos += size;
             size = 0;
-        } 
-        else {
-            //否则写入ncap的大小
+        } else {
             memcpy(m_cur->ptr + npos, (const char*)buf + bpos, ncap);
             m_position += ncap;
             bpos += ncap;
@@ -419,7 +371,6 @@ void ByteArray::write(const void* buf, size_t size) {
         }
     }
 
-    //更新当前数据总大小
     if(m_position > m_size) {
         m_size = m_position;
     }
@@ -430,11 +381,8 @@ void ByteArray::read(void* buf, size_t size) {
         throw std::out_of_range("not enough len");
     }
 
-    //当前内存块上操作的位置
     size_t npos = m_position % m_baseSize;
-    //为当前内存块剩余的大小    
     size_t ncap = m_cur->size - npos;
-    //当前累计读出的大小
     size_t bpos = 0;
     while(size > 0) {
         if(ncap >= size) {
@@ -445,8 +393,7 @@ void ByteArray::read(void* buf, size_t size) {
             m_position += size;
             bpos += size;
             size = 0;
-        } 
-        else {
+        } else {
             memcpy((char*)buf + bpos, m_cur->ptr + npos, ncap);
             m_position += ncap;
             bpos += ncap;
@@ -459,7 +406,7 @@ void ByteArray::read(void* buf, size_t size) {
 }
 
 void ByteArray::read(void* buf, size_t size, size_t position) const {
-    if(size > (m_size - position)) {
+    if(size > getReadSize()) {
         throw std::out_of_range("not enough len");
     }
 
@@ -489,19 +436,10 @@ void ByteArray::read(void* buf, size_t size, size_t position) const {
 }
 
 void ByteArray::setPosition(size_t v) {
-    if(v > m_capacity) {
+    if(v > m_size) {
         throw std::out_of_range("set_position out of range");
     }
     m_position = v;
-
-    //如果当前设置的位置超出了使用的大小时，大小设置为当前位置大小
-    if(m_position > m_size) {
-        m_size = m_position;
-    }
-
-    /*
-    
-    */
     m_cur = m_root;
     while(v > m_cur->size) {
         v -= m_cur->size;
@@ -526,12 +464,8 @@ bool ByteArray::writeToFile(const std::string& name) const {
     Node* cur = m_cur;
 
     while(read_size > 0) {
-        //取出偏移位
         int diff = pos % m_baseSize;
-        //计算出长度
         int64_t len = (read_size > (int64_t)m_baseSize ? m_baseSize : read_size) - diff;
-
-        //写入
         ofs.write(cur->ptr + diff, len);
         cur = cur->next;
         pos += len;
@@ -552,10 +486,7 @@ bool ByteArray::readFromFile(const std::string& name) {
 
     std::shared_ptr<char> buff(new char[m_baseSize], [](char* ptr) { delete[] ptr;});
     while(!ifs.eof()) {
-
-        //每次读最多m_baseSize大小的数据
         ifs.read(buff.get(), m_baseSize);
-        //写入
         write(buff.get(), ifs.gcount());
     }
     return true;
@@ -571,17 +502,12 @@ void ByteArray::addCapacity(size_t size) {
     }
 
     size = size - old_cap;
-
-    //需要的内存块的数量，向上取整
-    size_t count = ceil(1.0 * size / m_baseSize);
-
-    //找到最后一个内存块
+    size_t count = (size / m_baseSize) + (((size % m_baseSize) > old_cap) ? 1 : 0);
     Node* tmp = m_root;
     while(tmp->next) {
         tmp = tmp->next;
     }
 
-    //指向创建的第一个内存块
     Node* first = NULL;
     for(size_t i = 0; i < count; ++i) {
         tmp->next = new Node(m_baseSize);
@@ -592,10 +518,6 @@ void ByteArray::addCapacity(size_t size) {
         m_capacity += m_baseSize;
     }
 
-    /*
-    如果剩余容量为0
-    当前操作的内存块指向新创建的内存块
-    */
     if(old_cap == 0) {
         m_cur = first;
     }

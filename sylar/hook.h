@@ -10,26 +10,13 @@
 #include <unistd.h>
 
 namespace sylar {
-    /**
-     * @brief 当前线程是否hook
-     */
     bool is_hook_enable();
-    /**
-     * @brief 设置当前线程的hook状态
-     */
     void set_hook_enable(bool flag);
 }
 
 extern "C" {
 
 //sleep
-
-/*
-hook函数
-使用name_f可表示为name_fun
-使用dlsym查找name的函数指针，转成name_fun赋值给name_f
-原name函数的返回值必须相同 --> 使用typedef把name_fun函数指针转换成相同的返回值类型
-*/
 typedef unsigned int (*sleep_fun)(unsigned int seconds);
 extern sleep_fun sleep_f;
 

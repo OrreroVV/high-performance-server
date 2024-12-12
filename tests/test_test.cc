@@ -31,7 +31,7 @@ struct Node
 
 int main(int argc, char *argv[]) {
     char *t = new char[100];
-    
+    cout << t << endl;
     cout << sizeof(Node) << endl;
     return 0;
 }
