@@ -4,3 +4,6 @@ lib/*
 logs/*
 temp/
 .vscode/
+GPATH
+GRTAGS
+GTAGS

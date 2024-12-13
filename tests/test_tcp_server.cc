@@ -17,7 +17,6 @@ void run() {
         sleep(2);
     }
     tcp_server->start();
-    
 }
 int main(int argc, char** argv) {
     sylar::IOManager iom(2);
