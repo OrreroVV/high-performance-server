@@ -10,7 +10,7 @@ class Stream {
 public:
     typedef std::shared_ptr<Stream> ptr;
     virtual ~Stream() {}
-    
+
     virtual int read(void* buffer, size_t length) = 0;
     virtual int read(ByteArray::ptr ba, size_t length) = 0;
     virtual int readFixSize(void* buffer, size_t length);
