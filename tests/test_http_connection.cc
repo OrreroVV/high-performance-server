@@ -8,7 +8,7 @@ static sylar::Logger::ptr g_logger = SYLAR_LOG_ROOT();
 
 void test_pool() {
     sylar::http::HttpConnectionPool::ptr pool(new sylar::http::HttpConnectionPool(
-                "www.baidu.com", "", 80, 10, 1000 * 30, 5));
+                "www.sylar.top", "", 80, 10, 1000 * 30, 5));
 
     sylar::IOManager::GetThis()->addTimer(1000, [pool](){
             auto r = pool->doGet("/", 300);
@@ -63,6 +63,6 @@ void run() {
 
 int main(int argc, char** argv) {
     sylar::IOManager iom(2);
-    iom.schedule(test_pool);
+    iom.schedule(run);
     return 0;
 }
