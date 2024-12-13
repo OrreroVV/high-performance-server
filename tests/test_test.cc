@@ -1,37 +1,52 @@
-#include <bits/stdc++.h>
+#include <iostream>
+#include <thread>
+#include <vector>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <unistd.h>
 
-using namespace std;
+void connectToServer(int thread_id) {
+    const char* server_ip = "127.0.0.1";  // 替换为实际 IP 地址
+    const int server_port = 8033;
 
-static uint32_t EncodeZigzag32(const int32_t& v) {
-    if(v < 0) {
-        return ((uint32_t)(-v)) * 2 - 1;
-    } 
-    else {
-        return v * 2;
+    int sock = socket(AF_INET, SOCK_STREAM, 0);
+    if (sock < 0) {
+        std::cerr << "Thread " << thread_id << ": Failed to create socket\n";
+        return;
     }
+
+    sockaddr_in server_addr;
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_port = htons(server_port);
+    if (inet_pton(AF_INET, server_ip, &server_addr.sin_addr) <= 0) {
+        std::cerr << "Thread " << thread_id << ": Invalid address/ Address not supported\n";
+        close(sock);
+        return;
+    }
+
+    if (connect(sock, (struct sockaddr*)&server_addr, sizeof(server_addr)) < 0) {
+        std::cerr << "Thread " << thread_id << ": Connection failed\n";
+        close(sock);
+        return;
+    }
+
+    std::cout << "Thread " << thread_id << ": Connected to server successfully\n";
+
+    close(sock);
 }
 
-static int32_t DecodeZigzag32(const uint32_t& v) {
-    return (v >> 1) ^ -(v & 1);
-}
+int main() {
+    const int num_threads = 100;
+    std::vector<std::thread> threads;
 
-struct Node
-{
-    /*
-    8
-    8
-    24
-    */
-    
-     int8_t v;
-     int64_t v1;
-     char x[9];
+    for (int i = 0; i < num_threads; ++i) {
+        threads.emplace_back(connectToServer, i);
+    }
 
-};
+    for (auto& t : threads) {
+        t.join();
+    }
 
-int main(int argc, char *argv[]) {
-    char *t = new char[100];
-    cout << t << endl;
-    cout << sizeof(Node) << endl;
+    std::cout << "All threads completed\n";
     return 0;
 }
