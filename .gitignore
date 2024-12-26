@@ -2,3 +2,8 @@ build/
 bin/*
 lib/*
 logs/*
+temp/
+.vscode/
+GPATH
+GRTAGS
+GTAGS
