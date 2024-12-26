@@ -1,13 +1,22 @@
+/**
+ * @file fiber.h
+ * @brief 协程封装
+ * @author sylar.yin
+ * @email 564628276@qq.com
+ * @date 2019-05-24
+ * @copyright Copyright (c) 2019年 sylar.yin All rights reserved (www.sylar.top)
+ */
 #ifndef __SYLAR_FIBER_H__
 #define __SYLAR_FIBER_H__
 
 #include <memory>
 #include <functional>
 #include <ucontext.h>
+#include "thread.h"
 
 namespace sylar {
-class Scheduler;
 
+class Scheduler;
 
 /**
  * @brief 协程类
@@ -21,23 +30,16 @@ public:
      * @brief 协程状态
      */
     enum State {
-        /// 和进程类似，五个状态
-
-        /// 初始化状态  
+        /// 初始化状态
         INIT,
-
-        /// 阻塞状态
+        /// 暂停状态
         HOLD,
-
-        /// 执行状态
+        /// 执行中状态
         EXEC,
-
         /// 结束状态
         TERM,
-
-        /// 准备状态
+        /// 可执行状态
         READY,
-
         /// 异常状态
         EXCEPT
     };

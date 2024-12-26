@@ -79,8 +79,7 @@ bool Timer::reset(uint64_t ms, bool from_now) {
     uint64_t start = 0;
     if(from_now) {
         start = sylar::GetCurrentMS();
-    } 
-    else {
+    } else {
         start = m_next - m_ms;
     }
     m_ms = ms;
@@ -106,23 +105,15 @@ Timer::ptr TimerManager::addTimer(uint64_t ms, std::function<void()> cb
 }
 
 static void OnTimer(std::weak_ptr<void> weak_cond, std::function<void()> cb) {
-    // 使用弱指针检查所指向的对象是否存在
     std::shared_ptr<void> tmp = weak_cond.lock();
     if(tmp) {
         cb();
     }
 }
 
-/*
-添加条件计时器
-cb为回调函数
-bind绑定静态函数OnTimer，无需this指向
-weak_cond为条件弱指针
-*/
 Timer::ptr TimerManager::addConditionTimer(uint64_t ms, std::function<void()> cb
                                     ,std::weak_ptr<void> weak_cond
                                     ,bool recurring) {
-                                        
     return addTimer(ms, std::bind(&OnTimer, weak_cond, cb), recurring);
 }
 
@@ -182,8 +173,6 @@ void TimerManager::listExpiredCb(std::vector<std::function<void()> >& cbs) {
 
 void TimerManager::addTimer(Timer::ptr val, RWMutexType::WriteLock& lock) {
     auto it = m_timers.insert(val).first;
-
-    //如果这个加入的定时器是即将执行的定时器
     bool at_front = (it == m_timers.begin()) && !m_tickled;
     if(at_front) {
         m_tickled = true;

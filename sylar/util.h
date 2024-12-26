@@ -1,3 +1,11 @@
+/**
+ * @file util.h
+ * @brief 常用的工具函数
+ * @author sylar.yin
+ * @email 564628276@qq.com
+ * @date 2019-05-27
+ * @copyright Copyright (c) 2019年 sylar.yin All rights reserved (www.sylar.top)
+ */
 #ifndef __SYLAR_UTIL_H__
 #define __SYLAR_UTIL_H__
 
@@ -10,8 +18,16 @@
 #include <vector>
 #include <string>
 
-namespace sylar{
+namespace sylar {
+
+/**
+ * @brief 返回当前线程的ID
+ */
 pid_t GetThreadId();
+
+/**
+ * @brief 返回当前协程的ID
+ */
 uint32_t GetFiberId();
 
 /**
@@ -41,7 +57,5 @@ uint64_t GetCurrentMS();
 uint64_t GetCurrentUS();
 
 }
-
-
 
 #endif

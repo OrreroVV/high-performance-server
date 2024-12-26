@@ -1,3 +1,11 @@
+/**
+ * @file timer.h
+ * @brief 定时器封装
+ * @author sylar.yin
+ * @email 564628276@qq.com
+ * @date 2019-05-28
+ * @copyright Copyright (c) 2019年 sylar.yin All rights reserved (www.sylar.top)
+ */
 #ifndef __SYLAR_TIMER_H__
 #define __SYLAR_TIMER_H__
 
@@ -106,7 +114,7 @@ public:
      * @brief 添加条件定时器
      * @param[in] ms 定时器执行间隔时间
      * @param[in] cb 定时器回调函数
-     * @param[in] weak_cond 条件，弱指针
+     * @param[in] weak_cond 条件
      * @param[in] recurring 是否循环
      */
     Timer::ptr addConditionTimer(uint64_t ms, std::function<void()> cb

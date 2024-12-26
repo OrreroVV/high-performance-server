@@ -1,13 +1,19 @@
+/**
+ * @file scheduler.h
+ * @brief 协程调度器封装
+ * @author sylar.yin
+ * @email 564628276@qq.com
+ * @date 2019-05-28
+ * @copyright Copyright (c) 2019年 sylar.yin All rights reserved (www.sylar.top)
+ */
 #ifndef __SYLAR_SCHEDULER_H__
 #define __SYLAR_SCHEDULER_H__
 
 #include <memory>
 #include <vector>
 #include <list>
-#include <iostream>
 #include "fiber.h"
 #include "thread.h"
-#include "sylar.h"
 
 namespace sylar {
 
@@ -62,7 +68,7 @@ public:
     /**
      * @brief 调度协程
      * @param[in] fc 协程或函数
-     * @param[in] thread 协程执行的线程id, -1标识任意线程
+     * @param[in] thread 协程执行的线程id,-1标识任意线程
      */
     template<class FiberOrCb>
     void schedule(FiberOrCb fc, int thread = -1) {
@@ -96,9 +102,6 @@ public:
             tickle();
         }
     }
-
-    void switchTo(int thread = -1);
-    std::ostream& dump(std::ostream& os);
 protected:
     /**
      * @brief 通知协程调度器有任务了
@@ -116,8 +119,7 @@ protected:
     virtual bool stopping();
 
     /**
-     * @brief 协程无任务可调度时执行idle协程，占用CPU资源，或者其他实现方式
-     * 
+     * @brief 协程无任务可调度时执行idle协程
      */
     virtual void idle();
 
@@ -133,7 +135,6 @@ protected:
 private:
     /**
      * @brief 协程调度启动(无锁)
-     * 模板类，支持创建function或者fiber
      */
     template<class FiberOrCb>
     bool scheduleNoLock(FiberOrCb fc, int thread) {
@@ -236,16 +237,8 @@ protected:
     bool m_stopping = true;
     /// 是否自动停止
     bool m_autoStop = false;
-    /// 主线程id(use_caller)    -1的话说明不是主线程
+    /// 主线程id(use_caller)
     int m_rootThread = 0;
-};
-
-class SchedulerSwitcher : public Noncopyable {
-public:
-    SchedulerSwitcher(Scheduler* target = nullptr);
-    ~SchedulerSwitcher();
-private:
-    Scheduler* m_caller;
 };
 
 }

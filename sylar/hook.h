@@ -1,3 +1,12 @@
+/**
+ * @file hook.h
+ * @brief hook函数封装
+ * @author sylar.yin
+ * @email 564628276@qq.com
+ * @date 2019-06-02
+ * @copyright Copyright (c) 2019年 sylar.yin All rights reserved (www.sylar.top)
+ */
+
 #ifndef __SYLAR_HOOK_H__
 #define __SYLAR_HOOK_H__
 
@@ -23,13 +32,6 @@ namespace sylar {
 extern "C" {
 
 //sleep
-
-/*
-hook函数
-使用name_f可表示为name_fun
-使用dlsym查找name的函数指针，转成name_fun赋值给name_f
-原name函数的返回值必须相同 --> 使用typedef把name_fun函数指针转换成相同的返回值类型
-*/
 typedef unsigned int (*sleep_fun)(unsigned int seconds);
 extern sleep_fun sleep_f;
 

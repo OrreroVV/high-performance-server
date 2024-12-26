@@ -1,3 +1,11 @@
+/**
+ * @file iomanager.h
+ * @brief 基于Epoll的IO协程调度器
+ * @author sylar.yin
+ * @email 564628276@qq.com
+ * @date 2019-05-28
+ * @copyright Copyright (c) 2019年 sylar.yin All rights reserved (www.sylar.top)
+ */
 #ifndef __SYLAR_IOMANAGER_H__
 #define __SYLAR_IOMANAGER_H__
 
@@ -27,12 +35,12 @@ public:
     };
 private:
     /**
-     * @brief Socket事件上下文类
+     * @brief Socket事件上线文类
      */
     struct FdContext {
         typedef Mutex MutexType;
         /**
-         * @brief 事件上下文类
+         * @brief 事件上线文类
          */
         struct EventContext {
             /// 事件执行的调度器
@@ -46,7 +54,7 @@ private:
         /**
          * @brief 获取事件上下文类
          * @param[in] event 事件类型
-         * @return 返回对应事件的上下文
+         * @return 返回对应事件的上线文
          */
         EventContext& getContext(Event event);
 
@@ -144,7 +152,7 @@ protected:
 private:
     /// epoll 文件句柄
     int m_epfd = 0;
-    /// pipe 文件句柄，通过管道实现双向通信
+    /// pipe 文件句柄
     int m_tickleFds[2];
     /// 当前等待执行的事件数量
     std::atomic<size_t> m_pendingEventCount = {0};

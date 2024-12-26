@@ -1,251 +1,129 @@
-# 开发环境
+# sylar
 
-```
-ubuntu 18.04
-gcc 9.1.0
+## 视频教程地址
+0. [C++高级教程-从零开始开发服务器框架(sylar)](https://www.bilibili.com/video/av53602631/ "")
+1. [C++服务器框架01_日志系统01](https://www.bilibili.com/video/av52778994/?from=www.sylar.top "")
+2. [C++服务器框架02_日志系统02_logger](https://www.bilibili.com/video/av52906685/?from=www.sylar.top "")
+3. [C++服务器框架03_日志系统03_appender](https://www.bilibili.com/video/av52906934/?from=www.sylar.top "")
+4. [C++服务器框架04_日志系统04_formatter](https://www.bilibili.com/video/av52907828/?from=www.sylar.top "")
+5. [C++服务器框架05_日志系统05_formatter2](https://www.bilibili.com/video/av52907987/?from=www.sylar.top "")
+6. [C++服务器框架06_日志系统06_编译调试](https://www.bilibili.com/video/av52908593/?from=www.sylar.top "")
+7. [C++服务器框架07_日志系统07_完善日志系统](https://www.bilibili.com/video/av52908471/?from=www.sylar.top "")
+8. [C++服务器框架08_日志系统08_完善日志系统2](https://www.bilibili.com/video/av52908727/?from=www.sylar.top "")
+9. [C++服务器框架09_配置系统01_基础配置](https://www.bilibili.com/video/av52909181/?from=www.sylar.top "")
+10. [C++服务器框架10_配置系统02_yaml](https://www.bilibili.com/video/av52909223/?from=www.sylar.top "")
+11. [C++服务器框架11_配置系统03_yaml整合](https://www.bilibili.com/video/av52909256/?from=www.sylar.top "")
+12. [C++服务器框架12_配置系统04_复杂类型的支持](https://www.bilibili.com/video/av52990220/?from=www.sylar.top "")
+13. [C++服务器框架13_配置系统05_更多stl容器支持](https://www.bilibili.com/video/av52991045/?from=www.sylar.top "")
+14. [C++服务器框架14_配置系统06_自定义类型的支持](https://www.bilibili.com/video/av52992071/?from=www.sylar.top "")
+15. [C++服务器框架15_配置系统07_配置变更事件](https://www.bilibili.com/video/av52992614/?from=www.sylar.top "")
+16. [C++服务器框架16_配置系统08_日志系统整合01](https://www.bilibili.com/video/av52993407/?from=www.sylar.top "")
+17. [C++服务器框架17_配置系统09_日志系统整合02](https://www.bilibili.com/video/av52994250/?from=www.sylar.top "")
+18. [C++服务器框架18_配置系统10_日志系统整合03](https://www.bilibili.com/video/av52995442/?from=www.sylar.top "")
+
+## 开发环境
+Centos7
+gcc 9.1
 cmake
+ragel
 
-Boost
-wget https://boostorg.jfrog.io/artifactory/main/release/1.84.0/source/boost_1_84_0.tar.gz
-tar -xzvf boost_1_84_0.tar.gz
-构建：sudo ./bootstrap.sh 
-安装：sudo ./b2 install
+## 项目路径
+bin  -- 二进制
+build -- 中间文件路径
+cmake -- cmake函数文件夹
+CMakeLists.txt -- cmake的定义文件  
+lib -- 库的输出路径  
+Makefile
+sylar -- 源代码路径
+tests -- 测试代码
 
-yaml-cpp 安装
-wget https://codeload.github.com/jbeder/yaml-cpp/tar.gz/refs/tags/0.8.0
+## 日志系统
+1）
+    Log4J
+    
+    Logger (定义日志类别)
+       |
+       |-------Formatter（日志格式）
+       |
+    Appender（日志输出地方）
+    
+    
+## 配置系统
+
+Config --> Yaml
+
+yamp-cpp: github 搜
 mkdir build && cd build && cmake .. && make install
-```
 
-# 项目路径
-
-```shell
-bin --二进制输出文件	
-build --中间文件路径
-cmake 	--cmake定义脚本文件夹
-CmakeLists.txt	 --cmake
-lib	--库的输出路径
-# Makefile	--
-sylar	--源代码路径
-tests	--测试路径
-logs 	--日志存放路径
-```
-
-
-
-
-
-# 日志系统
-
-## Log4J
-
-```
-Logger（定义日志类别）
-
-​	|
-
-​		Formatter（日志格式）
-
-​	|
-
-Appender（日志输出）
-```
-
-
-# 配置系统
-
-```shell
-config -> Yaml
-
-YAML使用
+```cpp
+YAML::Node node = YAML::LoadFile(filename);
 node.IsMap()
-YAML::Node node = YAML::LoadFile(filename)
+for(auto it = node.begin();
+    it != node.end(); ++it) {
+        it->first, it->second
+}
+
 node.IsSequence()
-vector
+for(size_t i = 0; i < node.size(); ++i) {
+    
+}
+
+node.IsScalar();
 ```
 
+配置系统的原则，约定优于配置：
 
-
-
-
-# 配置系统原则
-
-```c++
+```cpp
 template<T, FromStr, ToStr>
+class ConfigVar;
 
-vector<T> -> T
+template<F, T>
+LexicalCast;
 
-//容器片特化
-//vector list map unordered_map unordered_set class
-
-//配置类型转换
-LexicalCast<F, T>
-//实现片特化->解析自定义类型
-
-定义LogDefine LogAppenderDefine ->偏特化	LexicalCast
-实现日志解析
+//容器片特化，目前支持vector
+//list, set, map, unordered_set, unordered_map
+// map/unordered_set 支持key = std::string
+// Config::Lookup(key) , key相同， 类型不同的，不会有报错。这个需要处理一下
 ```
 
-# 配置事件机制
+自定义类型，需要实现sylar::LexicalCast,片特化
+实现后，就可以支持Config解析自定义类型，自定义类型可以和常规stl容器一起使用。
 
-当一个配置项发生改变时，可以反向通知对应的代码，设置回调函数
+配置的事件机制
+当一个配置项发生修改的时候，可以反向通知对应的代码，回调
 
-对每一个$logger$添加回调函数
-
-# 日志系统整合配置
-
-$log.yml$大纲
-
+# 日志系统整合配置系统
 ```yaml
-logs:
-  - name: root
-    level: (debug, info, warn, error, fatal)
-    formatter: '%d%T%m%n'
-    appenders:
-      - type: (FileLogAppender, StdoutLogAppender)
-      #  file: /apps/logs/sylar/root.txt
+logs：
+    - name: root
+      level: (debug,info,warn,error,fatal)
+      formatter: '%d%T%p%T%t%m%n'
+      appender:
+        - type: (StdoutLogAppender, FileLogAppender)
+          level:(debug,...)
+          file: /logs/xxx.log
 ```
-
-
+```cpp
+    sylar::Logger g_logger = sylar::LoggerMgr::GetInstance()->getLogger(name);
+    SYLAR_LOG_INFO(g_logger) << "xxxx log";
+```
 
 ```cpp
-sylar::Logger g_logger = sylar::LoggerMgr::GetInstance()->getLogger(name);
-#define: ->   SYLAR_LOG_NAME(name)
-获取logger
-
-
+static Logger::ptr g_log = SYLAR_LOG_NAME("system"); //m_root, m_system-> m_root 当logger的appenders为空，使用root写logger
 ```
-
-
-
-系统日志
 
 ```cpp
-static Logger::ptr system_log = SYLAR_LOG_NAME("system");//名为system的logger，方便调整输出格式等
-
+//定义LogDefine LogAppenderDefine, 偏特化 LexicalCast,
+//实现日志配置解析
 ```
 
 
+## 协程库封装
 
-# 线程
+## socket函数库
 
-```cpp
-//局部锁模板
-ScopedLockImpl
-ReadScopedLockImpl
-WriteScopedLockImpl
+## http协议开发
 
-//互斥量
-typedef ScopedLockImpl<Mutex> Lock;
-//空锁
-typedef ScopedLockImpl<NullMutex> Lock;
-//读写锁	
-typedef ReadScopedLockImpl<RWMutex> ReadLock;
-typedef WriteScopedLockImpl<RWMutex> WriteLock;
-//自旋锁
-typedef ScopedLockImpl<Spinlock> Lock;
-//原子锁
-typedef ScopedLockImpl<CASLock> Lock;
-```
+## 分布协议
 
-
-
-# 协程库封装
-
-
-## 定义协程接口
-```
-ucontext_t
-macro
-```
-
-```shell
-Fiber::GetThis() # 得到当前协程
-
-Thread -> main_fiber <--> sub_fiber
-```
-
-##协程调度模块
-
-```
-        1  -   N   1 -  M
-scheduler ->  thread -> fiber
-        N       -       M
-1. 线程池  分配一组线程
-2. 协程调度器 将协程制定到相应的线程上去执行
-```
-作用：开辟一组线程池，对想要执行的协程找到一个对应的线程，放到该线程队列中去执行
-
-
-协程调度器
-```
-m_fibers  --> (function<void()> || fiber) 需要thread_id
-```
-
-start()
-
-stop()
-
-//调度核心，协程调度器如何去协助工作
-
-run()
-1. 设置当前线程的协程调度(scheduler)
-2. 设置当前的线程的run， fiber
-3. 协程调度
-    1. 协程消息队列里面是否有任务
-    2. 无任务时执行idle
-
-
-
-```
-IOManager(epoll) --> Scheduler
-        |
-        |
-        |
-        |
-        v
-        idle(epoll_wait)
-
-PutMessage(msg.) 信号量+1
-message_queue
-        |
-        |---Thread
-        |---Thread
-                wait()信号量-1， RecvMessage
-异步IO，等待数据返回 -->epoll_wait
-```
-
-定时器
-```
-针对IOmanager创建定时器
-Timer -> addTimer() --> cancel()
-获取当前定时器触发离现在的时间差
-返回当前要触发的定时器，执行回调函数
-```
-
-
-```
-[Fiber] --> [Thread] --> [Scheduler]
-                             |
-                             |
-                      [IOmanager(epoll)]
-                             |
-                             |
-                         [timeManager]
-                             |
-                             |
-                          [Timer]
-
-```
-
-## HOOK
-```
-sleep
-
-usleep
-```
-
-# socker函数库
-
-# http协议开发
-
-# 分布式协议
+## 推荐系统
